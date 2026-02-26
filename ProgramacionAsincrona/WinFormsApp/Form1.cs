@@ -23,20 +23,31 @@ namespace WinFormsApp
             loadingGif.Visible = true;
             await Esperar();
             var nombre = txtInput.Text;
-            var saludo = await ObtenerSaludo(nombre);
-            MessageBox.Show(saludo);
+
+            try
+            {
+                var saludo = await ObtenerSaludo(nombre);
+                MessageBox.Show(saludo);
+            }
+            catch(HttpRequestException ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            
+            
             loadingGif.Visible = false;
         }
 
         private async Task Esperar()
         {
-            await Task.Delay(TimeSpan.FromSeconds(5));
+            await Task.Delay(TimeSpan.FromSeconds(1));
         }
 
         private async Task<string> ObtenerSaludo(string nombre)
         {
-            using (var respuesta = await _httpClient.GetAsync($"{_apiUrl}/api/Saludos/{nombre}"))
+            using (var respuesta = await _httpClient.GetAsync($"{_apiUrl}/api/Saludos2/{nombre}"))
             {
+                respuesta.EnsureSuccessStatusCode();
                 var saludo = await respuesta.Content.ReadAsStringAsync();
                 return saludo;
             }
