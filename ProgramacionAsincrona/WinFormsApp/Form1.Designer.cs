@@ -53,6 +53,7 @@
             loadingGif.SizeMode = PictureBoxSizeMode.Zoom;
             loadingGif.TabIndex = 1;
             loadingGif.TabStop = false;
+            loadingGif.Visible = false;
             // 
             // Form1
             // 
