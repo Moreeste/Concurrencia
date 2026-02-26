@@ -16,8 +16,13 @@ namespace WinFormsApp
         private async void btnIniciar_Click(object sender, EventArgs e)
         {
             loadingGif.Visible = true;
-            await Task.Delay(TimeSpan.FromSeconds(5));
+            await Esperar();
             loadingGif.Visible = false;
+        }
+
+        private async Task Esperar()
+        {
+            await Task.Delay(TimeSpan.FromSeconds(5));
         }
     }
 }
