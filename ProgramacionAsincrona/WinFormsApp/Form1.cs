@@ -25,7 +25,7 @@ namespace WinFormsApp
         {
             loadingGif.Visible = true;
 
-            var tarjetas = await ObtenerTarjetasDeCredito(25000);
+            var tarjetas = await ObtenerTarjetasDeCredito(2500);
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -46,7 +46,7 @@ namespace WinFormsApp
 
         private async Task ProcesarTarjetas(List<string> tarjetas)
         {
-            using var semaforo = new SemaphoreSlim(4000);
+            using var semaforo = new SemaphoreSlim(1000);
 
             var tareas = new List<Task<HttpResponseMessage>>();
 
@@ -65,7 +65,25 @@ namespace WinFormsApp
                 }
             }).ToList();
 
-            await Task.WhenAll(tareas);
+            var respuestas = await Task.WhenAll(tareas);
+
+            var tarjetasRechazadas = new List<string>();
+
+            foreach (var respuesta in respuestas)
+            {
+                var contenido = await respuesta.Content.ReadAsStringAsync();
+                var respuestaTarjeta = JsonConvert.DeserializeObject<RespuestaTarjeta>(contenido);
+
+                if (!respuestaTarjeta.Aprobada)
+                {
+                    tarjetasRechazadas.Add(respuestaTarjeta.Tarjeta);
+                }
+            }
+
+            foreach (var tarjeta in tarjetasRechazadas)
+            {
+                Console.WriteLine(tarjeta);
+            }
         }
 
         private async Task<List<string>> ObtenerTarjetasDeCredito(int cantidadDeTarjetas)
