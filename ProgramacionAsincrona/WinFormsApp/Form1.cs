@@ -46,18 +46,24 @@ namespace WinFormsApp
 
         private async Task ProcesarTarjetas(List<string> tarjetas)
         {
-            var tareas = new List<Task>();
+            using var semaforo = new SemaphoreSlim(4000);
 
-            await Task.Run(() =>
+            var tareas = new List<Task<HttpResponseMessage>>();
+
+            tareas = tarjetas.Select(async tarjeta =>
             {
-                foreach (var tarjeta in tarjetas)
+                var json = JsonConvert.SerializeObject(tarjeta);
+                var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                await semaforo.WaitAsync();
+                try
                 {
-                    var json = JsonConvert.SerializeObject(tarjeta);
-                    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                    var respuestaTask = _httpClient.PostAsync($"{_apiUrl}/api/Tarjetas", content);
-                    tareas.Add(respuestaTask);
+                    return await _httpClient.PostAsync($"{_apiUrl}/api/Tarjetas", content);
                 }
-            });
+                finally
+                {
+                    semaforo.Release();
+                }
+            }).ToList();
 
             await Task.WhenAll(tareas);
         }
