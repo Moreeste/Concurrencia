@@ -25,7 +25,7 @@ namespace WinFormsApp
         {
             loadingGif.Visible = true;
 
-            var tarjetas = ObtenerTarjetasDeCredito(25000);
+            var tarjetas = await ObtenerTarjetasDeCredito(25000);
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -48,27 +48,33 @@ namespace WinFormsApp
         {
             var tareas = new List<Task>();
 
-            foreach (var tarjeta in tarjetas)
+            await Task.Run(() =>
             {
-                var json = JsonConvert.SerializeObject(tarjeta);
-                var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                var respuestaTask = _httpClient.PostAsync($"{_apiUrl}/api/Tarjetas", content);
-                tareas.Add(respuestaTask);
-            }
+                foreach (var tarjeta in tarjetas)
+                {
+                    var json = JsonConvert.SerializeObject(tarjeta);
+                    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                    var respuestaTask = _httpClient.PostAsync($"{_apiUrl}/api/Tarjetas", content);
+                    tareas.Add(respuestaTask);
+                }
+            });
 
             await Task.WhenAll(tareas);
         }
 
-        private List<string> ObtenerTarjetasDeCredito(int cantidadDeTarjetas)
+        private async Task<List<string>> ObtenerTarjetasDeCredito(int cantidadDeTarjetas)
         {
-            var tarjetas = new List<string>();
-
-            for (int i = 0; i < cantidadDeTarjetas; i++)
+            return await Task.Run(() =>
             {
-                tarjetas.Add(i.ToString().PadLeft(16, '0'));
-            }
+                var tarjetas = new List<string>();
 
-            return tarjetas;
+                for (int i = 0; i < cantidadDeTarjetas; i++)
+                {
+                    tarjetas.Add(i.ToString().PadLeft(16, '0'));
+                }
+
+                return tarjetas;
+            });
         }
 
         private async Task Esperar()
