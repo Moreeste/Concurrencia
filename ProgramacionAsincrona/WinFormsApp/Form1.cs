@@ -69,14 +69,14 @@ namespace WinFormsApp
                 {
                     var tareaInterna = await _httpClient.PostAsync($"{_apiUrl}/api/Tarjetas", content);
 
-                    if (progress != null)
-                    {
-                        indice++;
-                        var porcentaje = (double)indice / tarjetas.Count;
-                        porcentaje = porcentaje * 100;
-                        var porcentajeInt = (int)Math.Round(porcentaje, 0);
-                        progress.Report(porcentajeInt);
-                    }
+                    //if (progress != null)
+                    //{
+                    //    indice++;
+                    //    var porcentaje = (double)indice / tarjetas.Count;
+                    //    porcentaje = porcentaje * 100;
+                    //    var porcentajeInt = (int)Math.Round(porcentaje, 0);
+                    //    progress.Report(porcentajeInt);
+                    //}
 
                     return tareaInterna;
                 }
@@ -86,7 +86,21 @@ namespace WinFormsApp
                 }
             }).ToList();
 
-            var respuestas = await Task.WhenAll(tareas);
+            var respuestasTareas = Task.WhenAll(tareas);
+
+            if (progress != null)
+            {
+                while (await Task.WhenAny(respuestasTareas, Task.Delay(1000)) != respuestasTareas)
+                {
+                    var tareasCompletadas = tareas.Where(x => x.IsCompleted).Count();
+                    var porcentaje = (double)tareasCompletadas / tarjetas.Count;
+                    porcentaje = porcentaje * 100;
+                    var porcentajeInt = (int)Math.Round(porcentaje, 0);
+                    progress.Report(porcentajeInt);
+                }
+            }
+
+            var respuestas = await respuestasTareas;
 
             var tarjetasRechazadas = new List<string>();
 
