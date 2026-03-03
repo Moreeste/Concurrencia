@@ -24,6 +24,8 @@ namespace WinFormsApp
         private async void btnIniciar_Click(object sender, EventArgs e)
         {
             loadingGif.Visible = true;
+            pgProcesamiento.Visible = true;
+            var reportarProgreso = new Progress<int>(ReportarProgresoTarjetas);
 
             var tarjetas = await ObtenerTarjetasDeCredito(2500);
             var stopwatch = new Stopwatch();
@@ -31,7 +33,7 @@ namespace WinFormsApp
 
             try
             {
-                await ProcesarTarjetas(tarjetas);
+                await ProcesarTarjetas(tarjetas, reportarProgreso);
             }
             catch(HttpRequestException ex)
             {
@@ -42,13 +44,21 @@ namespace WinFormsApp
             MessageBox.Show($"Operación finalizada en: {stopwatch.Elapsed.TotalSeconds} segundos");
 
             loadingGif.Visible = false;
+            pgProcesamiento.Visible = false;
         }
 
-        private async Task ProcesarTarjetas(List<string> tarjetas)
+        private void ReportarProgresoTarjetas(int porcentaje)
+        {
+            pgProcesamiento.Value = porcentaje;
+        }
+
+        private async Task ProcesarTarjetas(List<string> tarjetas, IProgress<int> progress = null)
         {
             using var semaforo = new SemaphoreSlim(1000);
 
             var tareas = new List<Task<HttpResponseMessage>>();
+
+            var indice = 0;
 
             tareas = tarjetas.Select(async tarjeta =>
             {
@@ -57,7 +67,18 @@ namespace WinFormsApp
                 await semaforo.WaitAsync();
                 try
                 {
-                    return await _httpClient.PostAsync($"{_apiUrl}/api/Tarjetas", content);
+                    var tareaInterna = await _httpClient.PostAsync($"{_apiUrl}/api/Tarjetas", content);
+
+                    if (progress != null)
+                    {
+                        indice++;
+                        var porcentaje = (double)indice / tarjetas.Count;
+                        porcentaje = porcentaje * 100;
+                        var porcentajeInt = (int)Math.Round(porcentaje, 0);
+                        progress.Report(porcentajeInt);
+                    }
+
+                    return tareaInterna;
                 }
                 finally
                 {

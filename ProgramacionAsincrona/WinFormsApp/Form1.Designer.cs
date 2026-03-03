@@ -33,6 +33,7 @@
             loadingGif = new PictureBox();
             txtInput = new TextBox();
             label1 = new Label();
+            pgProcesamiento = new ProgressBar();
             ((System.ComponentModel.ISupportInitialize)loadingGif).BeginInit();
             SuspendLayout();
             // 
@@ -73,11 +74,20 @@
             label1.TabIndex = 3;
             label1.Text = "Nombre";
             // 
+            // pgProcesamiento
+            // 
+            pgProcesamiento.Location = new Point(328, 107);
+            pgProcesamiento.Name = "pgProcesamiento";
+            pgProcesamiento.Size = new Size(403, 29);
+            pgProcesamiento.TabIndex = 4;
+            pgProcesamiento.Visible = false;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(pgProcesamiento);
             Controls.Add(label1);
             Controls.Add(txtInput);
             Controls.Add(loadingGif);
@@ -95,5 +105,6 @@
         private PictureBox loadingGif;
         private TextBox txtInput;
         private Label label1;
+        private ProgressBar pgProcesamiento;
     }
 }
