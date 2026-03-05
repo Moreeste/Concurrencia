@@ -136,7 +136,7 @@ namespace WinFormsApp
 
                 for (int i = 0; i < cantidadDeTarjetas; i++)
                 {
-                    await Task.Delay(1000);
+                    //await Task.Delay(1000);
                     tarjetas.Add(i.ToString().PadLeft(16, '0'));
 
                     Console.WriteLine($"Han sido generadas {tarjetas.Count} tarjetas");
