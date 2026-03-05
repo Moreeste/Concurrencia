@@ -7,6 +7,7 @@ namespace WinFormsApp
     {
         private readonly string _apiUrl;
         private readonly HttpClient _httpClient;
+        private CancellationTokenSource _cancellationTokenSource;
 
         public Form1()
         {
@@ -23,21 +24,26 @@ namespace WinFormsApp
 
         private async void btnIniciar_Click(object sender, EventArgs e)
         {
+            _cancellationTokenSource = new CancellationTokenSource();
             loadingGif.Visible = true;
             pgProcesamiento.Visible = true;
             var reportarProgreso = new Progress<int>(ReportarProgresoTarjetas);
 
-            var tarjetas = await ObtenerTarjetasDeCredito(2500);
+            var tarjetas = await ObtenerTarjetasDeCredito(20);
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
             try
             {
-                await ProcesarTarjetas(tarjetas, reportarProgreso);
+                await ProcesarTarjetas(tarjetas, reportarProgreso, _cancellationTokenSource.Token);
             }
-            catch(HttpRequestException ex)
+            catch (HttpRequestException ex)
             {
                 MessageBox.Show(ex.Message);
+            }
+            catch (TaskCanceledException ex)
+            {
+                MessageBox.Show("Operación cancelada");
             }
 
             stopwatch.Stop();
@@ -45,6 +51,7 @@ namespace WinFormsApp
 
             loadingGif.Visible = false;
             pgProcesamiento.Visible = false;
+            pgProcesamiento.Value = 0;
         }
 
         private void ReportarProgresoTarjetas(int porcentaje)
@@ -52,9 +59,9 @@ namespace WinFormsApp
             pgProcesamiento.Value = porcentaje;
         }
 
-        private async Task ProcesarTarjetas(List<string> tarjetas, IProgress<int> progress = null)
+        private async Task ProcesarTarjetas(List<string> tarjetas, IProgress<int> progress = null, CancellationToken cancellationToken = default)
         {
-            using var semaforo = new SemaphoreSlim(1000);
+            using var semaforo = new SemaphoreSlim(2);
 
             var tareas = new List<Task<HttpResponseMessage>>();
 
@@ -67,7 +74,7 @@ namespace WinFormsApp
                 await semaforo.WaitAsync();
                 try
                 {
-                    var tareaInterna = await _httpClient.PostAsync($"{_apiUrl}/api/Tarjetas", content);
+                    var tareaInterna = await _httpClient.PostAsync($"{_apiUrl}/api/Tarjetas", content, cancellationToken);
 
                     //if (progress != null)
                     //{
@@ -149,6 +156,11 @@ namespace WinFormsApp
                 var saludo = await respuesta.Content.ReadAsStringAsync();
                 return saludo;
             }
+        }
+
+        private void btnCancelar_Click(object sender, EventArgs e)
+        {
+            _cancellationTokenSource?.Cancel();
         }
     }
 }

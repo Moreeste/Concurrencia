@@ -34,6 +34,7 @@
             txtInput = new TextBox();
             label1 = new Label();
             pgProcesamiento = new ProgressBar();
+            btnCancelar = new Button();
             ((System.ComponentModel.ISupportInitialize)loadingGif).BeginInit();
             SuspendLayout();
             // 
@@ -76,17 +77,28 @@
             // 
             // pgProcesamiento
             // 
-            pgProcesamiento.Location = new Point(328, 107);
+            pgProcesamiento.Location = new Point(296, 173);
             pgProcesamiento.Name = "pgProcesamiento";
             pgProcesamiento.Size = new Size(403, 29);
             pgProcesamiento.TabIndex = 4;
             pgProcesamiento.Visible = false;
+            // 
+            // btnCancelar
+            // 
+            btnCancelar.Location = new Point(296, 107);
+            btnCancelar.Name = "btnCancelar";
+            btnCancelar.Size = new Size(94, 29);
+            btnCancelar.TabIndex = 5;
+            btnCancelar.Text = "Cancelar";
+            btnCancelar.UseVisualStyleBackColor = true;
+            btnCancelar.Click += btnCancelar_Click;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(btnCancelar);
             Controls.Add(pgProcesamiento);
             Controls.Add(label1);
             Controls.Add(txtInput);
@@ -106,5 +118,6 @@
         private TextBox txtInput;
         private Label label1;
         private ProgressBar pgProcesamiento;
+        private Button btnCancelar;
     }
 }
