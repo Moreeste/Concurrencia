@@ -25,6 +25,7 @@ namespace WinFormsApp
         private async void btnIniciar_Click(object sender, EventArgs e)
         {
             _cancellationTokenSource = new CancellationTokenSource();
+            _cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(30));
             loadingGif.Visible = true;
             pgProcesamiento.Visible = true;
             var reportarProgreso = new Progress<int>(ReportarProgresoTarjetas);
