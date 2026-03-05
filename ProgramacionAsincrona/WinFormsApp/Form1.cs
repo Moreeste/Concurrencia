@@ -28,13 +28,13 @@ namespace WinFormsApp
             loadingGif.Visible = true;
             pgProcesamiento.Visible = true;
             var reportarProgreso = new Progress<int>(ReportarProgresoTarjetas);
-
-            var tarjetas = await ObtenerTarjetasDeCredito(20);
+            
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
             try
             {
+                var tarjetas = await ObtenerTarjetasDeCredito(20, _cancellationTokenSource.Token);
                 await ProcesarTarjetas(tarjetas, reportarProgreso, _cancellationTokenSource.Token);
             }
             catch (HttpRequestException ex)
@@ -128,15 +128,23 @@ namespace WinFormsApp
             }
         }
 
-        private async Task<List<string>> ObtenerTarjetasDeCredito(int cantidadDeTarjetas)
+        private async Task<List<string>> ObtenerTarjetasDeCredito(int cantidadDeTarjetas, CancellationToken cancellationToken = default)
         {
-            return await Task.Run(() =>
+            return await Task.Run(async () =>
             {
                 var tarjetas = new List<string>();
 
                 for (int i = 0; i < cantidadDeTarjetas; i++)
                 {
+                    await Task.Delay(1000);
                     tarjetas.Add(i.ToString().PadLeft(16, '0'));
+
+                    Console.WriteLine($"Han sido generadas {tarjetas.Count} tarjetas");
+
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
                 }
 
                 return tarjetas;
