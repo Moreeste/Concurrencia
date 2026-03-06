@@ -24,13 +24,13 @@ namespace WinFormsApp
 
         private async void btnIniciar_Click(object sender, EventArgs e)
         {
+            CheckForIllegalCrossThreadCalls = true;
+
             loadingGif.Visible = true;
 
-            Console.WriteLine($"Hilo antes del await: {Thread.CurrentThread.ManagedThreadId}");
-            await Task.Delay(TimeSpan.FromSeconds(1));
-            Console.WriteLine($"Hilo después del await: {Thread.CurrentThread.ManagedThreadId}");
-
-            await ObtenerSaludo("Esteban");
+            btnCancelar.Text = "Antes";
+            await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(continueOnCapturedContext: false);
+            btnCancelar.Text = "Después";
 
             loadingGif.Visible = false;
         }
