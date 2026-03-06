@@ -8,8 +8,12 @@ namespace WebApi.Controllers
     public class SaludosController : ControllerBase
     {
         [HttpGet("{nombre}")]
-        public ActionResult<string> ObtenerSaludo(string nombre)
+        public async Task<ActionResult<string>> ObtenerSaludo(string nombre)
         {
+            Console.WriteLine($"Hilo antes del await: {Thread.CurrentThread.ManagedThreadId}");
+            await Task.Delay(TimeSpan.FromSeconds(1));
+            Console.WriteLine($"Hilo después del await: {Thread.CurrentThread.ManagedThreadId}");
+
             return $"Hola, {nombre}!";
         }
     }

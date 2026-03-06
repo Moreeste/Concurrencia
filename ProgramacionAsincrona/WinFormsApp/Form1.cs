@@ -24,36 +24,49 @@ namespace WinFormsApp
 
         private async void btnIniciar_Click(object sender, EventArgs e)
         {
-            _cancellationTokenSource = new CancellationTokenSource();
-            _cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(30));
             loadingGif.Visible = true;
-            pgProcesamiento.Visible = true;
-            var reportarProgreso = new Progress<int>(ReportarProgresoTarjetas);
-            
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
 
-            try
-            {
-                var tarjetas = await ObtenerTarjetasDeCredito(20, _cancellationTokenSource.Token);
-                await ProcesarTarjetas(tarjetas, reportarProgreso, _cancellationTokenSource.Token);
-            }
-            catch (HttpRequestException ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-            catch (TaskCanceledException ex)
-            {
-                MessageBox.Show("Operación cancelada");
-            }
+            Console.WriteLine($"Hilo antes del await: {Thread.CurrentThread.ManagedThreadId}");
+            await Task.Delay(TimeSpan.FromSeconds(1));
+            Console.WriteLine($"Hilo después del await: {Thread.CurrentThread.ManagedThreadId}");
 
-            stopwatch.Stop();
-            MessageBox.Show($"Operación finalizada en: {stopwatch.Elapsed.TotalSeconds} segundos");
+            await ObtenerSaludo("Esteban");
 
             loadingGif.Visible = false;
-            pgProcesamiento.Visible = false;
-            pgProcesamiento.Value = 0;
         }
+
+        //private async void btnIniciar_Click(object sender, EventArgs e)
+        //{
+        //    _cancellationTokenSource = new CancellationTokenSource();
+        //    _cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(30));
+        //    loadingGif.Visible = true;
+        //    pgProcesamiento.Visible = true;
+        //    var reportarProgreso = new Progress<int>(ReportarProgresoTarjetas);
+
+            //    var stopwatch = new Stopwatch();
+            //    stopwatch.Start();
+
+            //    try
+            //    {
+            //        var tarjetas = await ObtenerTarjetasDeCredito(20, _cancellationTokenSource.Token);
+            //        await ProcesarTarjetas(tarjetas, reportarProgreso, _cancellationTokenSource.Token);
+            //    }
+            //    catch (HttpRequestException ex)
+            //    {
+            //        MessageBox.Show(ex.Message);
+            //    }
+            //    catch (TaskCanceledException ex)
+            //    {
+            //        MessageBox.Show("Operación cancelada");
+            //    }
+
+            //    stopwatch.Stop();
+            //    MessageBox.Show($"Operación finalizada en: {stopwatch.Elapsed.TotalSeconds} segundos");
+
+            //    loadingGif.Visible = false;
+            //    pgProcesamiento.Visible = false;
+            //    pgProcesamiento.Value = 0;
+            //}
 
         private void ReportarProgresoTarjetas(int porcentaje)
         {
@@ -183,7 +196,7 @@ namespace WinFormsApp
 
         private async Task<string> ObtenerSaludo(string nombre)
         {
-            using (var respuesta = await _httpClient.GetAsync($"{_apiUrl}/api/Saludos2/{nombre}"))
+            using (var respuesta = await _httpClient.GetAsync($"{_apiUrl}/api/Saludos/{nombre}"))
             {
                 respuesta.EnsureSuccessStatusCode();
                 var saludo = await respuesta.Content.ReadAsStringAsync();
