@@ -26,27 +26,56 @@ namespace WinFormsApp
         {
             loadingGif.Visible = true;
 
-            var tarea = EvaluaValor(txtInput.Text);
-
-            Console.WriteLine("Inicio");
-            Console.WriteLine($"Is Completed: {tarea.IsCompleted}");
-            Console.WriteLine($"Is Canceled: {tarea.IsCanceled}");
-            Console.WriteLine($"Is Faulted: {tarea.IsFaulted}");
+            _cancellationTokenSource = new CancellationTokenSource();
 
             try
             {
-                await tarea;
+                var resultado = await Task.Run(async () =>
+                {
+                    await Task.Delay(5000);
+                    return 7;
+
+                }).WithCancellation(_cancellationTokenSource.Token);
+
+                Console.WriteLine(resultado);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Excepción: {ex.Message}");
+                Console.WriteLine(ex.Message);
             }
-
-            Console.WriteLine("Fin");
-            Console.WriteLine("");
+            finally
+            {
+                _cancellationTokenSource.Dispose();
+            }
 
             loadingGif.Visible = false;
         }
+
+        //private async void btnIniciar_Click(object sender, EventArgs e)
+        //{
+        //    loadingGif.Visible = true;
+
+        //    var tarea = EvaluaValor(txtInput.Text);
+
+        //    Console.WriteLine("Inicio");
+        //    Console.WriteLine($"Is Completed: {tarea.IsCompleted}");
+        //    Console.WriteLine($"Is Canceled: {tarea.IsCanceled}");
+        //    Console.WriteLine($"Is Faulted: {tarea.IsFaulted}");
+
+        //    try
+        //    {
+        //        await tarea;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"Excepción: {ex.Message}");
+        //    }
+
+        //    Console.WriteLine("Fin");
+        //    Console.WriteLine("");
+
+        //    loadingGif.Visible = false;
+        //}
 
         public Task EvaluaValor(string valor)
         {
