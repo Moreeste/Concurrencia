@@ -24,16 +24,90 @@ namespace WinFormsApp
 
         private async void btnIniciar_Click(object sender, EventArgs e)
         {
-            CheckForIllegalCrossThreadCalls = true;
-
             loadingGif.Visible = true;
 
-            btnCancelar.Text = "Antes";
-            await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(continueOnCapturedContext: false);
-            btnCancelar.Text = "Después";
+            //await Reintentar(ProcesarSaludo);
+
+            try
+            {
+                var contenido = await Reintentar(async () =>
+                {
+                    using (var respuesta = await _httpClient.GetAsync($"{_apiUrl}/api/Saludos2/Esteban"))
+                    {
+                        respuesta.EnsureSuccessStatusCode();
+                        return await respuesta.Content.ReadAsStringAsync();
+                    }
+                });
+
+                Console.WriteLine(contenido);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Excepción atrapada");
+            }
+            
 
             loadingGif.Visible = false;
         }
+
+        private async Task ProcesarSaludo()
+        {
+            using (var respuesta = await _httpClient.GetAsync($"{_apiUrl}/api/Saludos2/Esteban"))
+            {
+                respuesta.EnsureSuccessStatusCode();
+                var contenido = await respuesta.Content.ReadAsStringAsync();
+                Console.WriteLine(contenido);
+            }
+        }
+
+        private async Task Reintentar(Func<Task> f, int reintentos = 3, int tiempoEspera = 500)
+        {
+            for (int i = 0; i < reintentos; i++)
+            {
+                try
+                {
+                    await f();
+                    break;
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    await Task.Delay(tiempoEspera);
+                }
+            }
+        }
+
+        private async Task<T> Reintentar<T>(Func<Task<T>> f, int reintentos = 3, int tiempoEspera = 500)
+        {
+            for (int i = 0; i < reintentos - 1; i++)
+            {
+                try
+                {
+                    return await f();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    await Task.Delay(tiempoEspera);
+                }
+            }
+
+            return await f();
+        }
+
+        //private async void btnIniciar_Click(object sender, EventArgs e)
+        //{
+        //    CheckForIllegalCrossThreadCalls = true;
+
+        //    loadingGif.Visible = true;
+
+        //    btnCancelar.Text = "Antes";
+        //    await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(continueOnCapturedContext: false);
+        //    btnCancelar.Text = "Después";
+
+        //    loadingGif.Visible = false;
+        //}
 
         //private async void btnIniciar_Click(object sender, EventArgs e)
         //{
@@ -43,30 +117,30 @@ namespace WinFormsApp
         //    pgProcesamiento.Visible = true;
         //    var reportarProgreso = new Progress<int>(ReportarProgresoTarjetas);
 
-            //    var stopwatch = new Stopwatch();
-            //    stopwatch.Start();
+        //    var stopwatch = new Stopwatch();
+        //    stopwatch.Start();
 
-            //    try
-            //    {
-            //        var tarjetas = await ObtenerTarjetasDeCredito(20, _cancellationTokenSource.Token);
-            //        await ProcesarTarjetas(tarjetas, reportarProgreso, _cancellationTokenSource.Token);
-            //    }
-            //    catch (HttpRequestException ex)
-            //    {
-            //        MessageBox.Show(ex.Message);
-            //    }
-            //    catch (TaskCanceledException ex)
-            //    {
-            //        MessageBox.Show("Operación cancelada");
-            //    }
+        //    try
+        //    {
+        //        var tarjetas = await ObtenerTarjetasDeCredito(20, _cancellationTokenSource.Token);
+        //        await ProcesarTarjetas(tarjetas, reportarProgreso, _cancellationTokenSource.Token);
+        //    }
+        //    catch (HttpRequestException ex)
+        //    {
+        //        MessageBox.Show(ex.Message);
+        //    }
+        //    catch (TaskCanceledException ex)
+        //    {
+        //        MessageBox.Show("Operación cancelada");
+        //    }
 
-            //    stopwatch.Stop();
-            //    MessageBox.Show($"Operación finalizada en: {stopwatch.Elapsed.TotalSeconds} segundos");
+        //    stopwatch.Stop();
+        //    MessageBox.Show($"Operación finalizada en: {stopwatch.Elapsed.TotalSeconds} segundos");
 
-            //    loadingGif.Visible = false;
-            //    pgProcesamiento.Visible = false;
-            //    pgProcesamiento.Value = 0;
-            //}
+        //    loadingGif.Visible = false;
+        //    pgProcesamiento.Visible = false;
+        //    pgProcesamiento.Value = 0;
+        //}
 
         private void ReportarProgresoTarjetas(int porcentaje)
         {
