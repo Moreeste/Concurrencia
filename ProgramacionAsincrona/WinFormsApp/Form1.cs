@@ -26,33 +26,79 @@ namespace WinFormsApp
         {
             loadingGif.Visible = true;
 
-            _cancellationTokenSource = new CancellationTokenSource();
-            var token = _cancellationTokenSource.Token;
-            var nombres = new string[] { "Esteban", "María", "Juan", "Ana", "Luis" };
+            var tarea = EvaluaValor(txtInput.Text);
 
-            //var tareasHttp = nombres.Select(x => ObtenerSaludoConDelay(x, token));
-            //var tarea = await Task.WhenAny(tareasHttp);
-            //var contenido = await tarea;
-            //Console.WriteLine(contenido.ToUpper());
-            //_cancellationTokenSource?.Cancel();
+            Console.WriteLine("Inicio");
+            Console.WriteLine($"Is Completed: {tarea.IsCompleted}");
+            Console.WriteLine($"Is Canceled: {tarea.IsCanceled}");
+            Console.WriteLine($"Is Faulted: {tarea.IsFaulted}");
 
-            //var tareasHttp = nombres.Select(x =>
-            //{
-            //    Func<CancellationToken, Task<string>> funcion = (cancellationToken) => ObtenerSaludoConDelay(x, cancellationToken);
-            //    return funcion;
-            //});
+            try
+            {
+                await tarea;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Excepción: {ex.Message}");
+            }
 
-            //var contenido = await EjecutarUno(tareasHttp);
-            //Console.WriteLine(contenido.ToUpper());
-
-            var contenido = await EjecutarUno(
-                (ct) => ObtenerSaludoConDelay("Esteban", ct),
-                (ct) => ObtenerDespedida("Esteban", ct));
-
-            Console.WriteLine(contenido.ToUpper());
+            Console.WriteLine("Fin");
+            Console.WriteLine("");
 
             loadingGif.Visible = false;
         }
+
+        public Task EvaluaValor(string valor)
+        {
+            var tcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            if (valor == "1")
+            {
+                tcs.SetResult(null);
+            }
+            else if (valor == "2")
+            {
+                tcs.SetCanceled();
+            }
+            else
+            {
+                tcs.SetException(new ApplicationException($"Valor inválido: {valor}"));
+            }
+
+            return tcs.Task;
+        }
+
+        //private async void btnIniciar_Click(object sender, EventArgs e)
+        //{
+        //    loadingGif.Visible = true;
+
+        //    _cancellationTokenSource = new CancellationTokenSource();
+        //    var token = _cancellationTokenSource.Token;
+        //    var nombres = new string[] { "Esteban", "María", "Juan", "Ana", "Luis" };
+
+        //    //var tareasHttp = nombres.Select(x => ObtenerSaludoConDelay(x, token));
+        //    //var tarea = await Task.WhenAny(tareasHttp);
+        //    //var contenido = await tarea;
+        //    //Console.WriteLine(contenido.ToUpper());
+        //    //_cancellationTokenSource?.Cancel();
+
+        //    //var tareasHttp = nombres.Select(x =>
+        //    //{
+        //    //    Func<CancellationToken, Task<string>> funcion = (cancellationToken) => ObtenerSaludoConDelay(x, cancellationToken);
+        //    //    return funcion;
+        //    //});
+
+        //    //var contenido = await EjecutarUno(tareasHttp);
+        //    //Console.WriteLine(contenido.ToUpper());
+
+        //    var contenido = await EjecutarUno(
+        //        (ct) => ObtenerSaludoConDelay("Esteban", ct),
+        //        (ct) => ObtenerDespedida("Esteban", ct));
+
+        //    Console.WriteLine(contenido.ToUpper());
+
+        //    loadingGif.Visible = false;
+        //}
 
         private async Task<T> EjecutarUno<T>(IEnumerable<Func<CancellationToken, Task<T>>> funciones)
         {
