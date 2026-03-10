@@ -26,29 +26,79 @@ namespace WinFormsApp
         {
             loadingGif.Visible = true;
 
-            //await Reintentar(ProcesarSaludo);
+            _cancellationTokenSource = new CancellationTokenSource();
+            var token = _cancellationTokenSource.Token;
+            var nombres = new string[] { "Esteban", "María", "Juan", "Ana", "Luis" };
 
-            try
-            {
-                var contenido = await Reintentar(async () =>
-                {
-                    using (var respuesta = await _httpClient.GetAsync($"{_apiUrl}/api/Saludos2/Esteban"))
-                    {
-                        respuesta.EnsureSuccessStatusCode();
-                        return await respuesta.Content.ReadAsStringAsync();
-                    }
-                });
+            //var tareasHttp = nombres.Select(x => ObtenerSaludoConDelay(x, token));
+            //var tarea = await Task.WhenAny(tareasHttp);
+            //var contenido = await tarea;
+            //Console.WriteLine(contenido.ToUpper());
+            //_cancellationTokenSource?.Cancel();
 
-                Console.WriteLine(contenido);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Excepción atrapada");
-            }
-            
+            //var tareasHttp = nombres.Select(x =>
+            //{
+            //    Func<CancellationToken, Task<string>> funcion = (cancellationToken) => ObtenerSaludoConDelay(x, cancellationToken);
+            //    return funcion;
+            //});
+
+            //var contenido = await EjecutarUno(tareasHttp);
+            //Console.WriteLine(contenido.ToUpper());
+
+            var contenido = await EjecutarUno(
+                (ct) => ObtenerSaludoConDelay("Esteban", ct),
+                (ct) => ObtenerDespedida("Esteban", ct));
+
+            Console.WriteLine(contenido.ToUpper());
 
             loadingGif.Visible = false;
         }
+
+        private async Task<T> EjecutarUno<T>(IEnumerable<Func<CancellationToken, Task<T>>> funciones)
+        {
+            var cts = new CancellationTokenSource();
+            var tareas = funciones.Select(funcion => funcion(cts.Token));
+            var tarea = await Task.WhenAny(tareas);
+            cts.Cancel();
+            return await tarea;
+        }
+
+        private async Task<T> EjecutarUno<T>(params Func<CancellationToken, Task<T>>[] funciones)
+        {
+            var cts = new CancellationTokenSource();
+            var tareas = funciones.Select(funcion => funcion(cts.Token));
+            var tarea = await Task.WhenAny(tareas);
+            cts.Cancel();
+            return await tarea;
+        }
+
+        //private async void btnIniciar_Click(object sender, EventArgs e)
+        //{
+        //    loadingGif.Visible = true;
+
+        //    //await Reintentar(ProcesarSaludo);
+
+        //    try
+        //    {
+        //        var contenido = await Reintentar(async () =>
+        //        {
+        //            using (var respuesta = await _httpClient.GetAsync($"{_apiUrl}/api/Saludos2/Esteban"))
+        //            {
+        //                respuesta.EnsureSuccessStatusCode();
+        //                return await respuesta.Content.ReadAsStringAsync();
+        //            }
+        //        });
+
+        //        Console.WriteLine(contenido);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine("Excepción atrapada");
+        //    }
+
+
+        //    loadingGif.Visible = false;
+        //}
 
         private async Task ProcesarSaludo()
         {
@@ -275,6 +325,26 @@ namespace WinFormsApp
                 respuesta.EnsureSuccessStatusCode();
                 var saludo = await respuesta.Content.ReadAsStringAsync();
                 return saludo;
+            }
+        }
+
+        private async Task<string> ObtenerSaludoConDelay(string nombre, CancellationToken cancellationToken)
+        {
+            using (var respuesta = await _httpClient.GetAsync($"{_apiUrl}/api/Saludos/Delay/{nombre}", cancellationToken))
+            {
+                var contenido = await respuesta.Content.ReadAsStringAsync();
+                Console.WriteLine(contenido);
+                return contenido;
+            }
+        }
+
+        private async Task<string> ObtenerDespedida(string nombre, CancellationToken cancellationToken)
+        {
+            using (var respuesta = await _httpClient.GetAsync($"{_apiUrl}/api/Saludos/Despedida/{nombre}", cancellationToken))
+            {
+                var contenido = await respuesta.Content.ReadAsStringAsync();
+                Console.WriteLine(contenido);
+                return contenido;
             }
         }
 

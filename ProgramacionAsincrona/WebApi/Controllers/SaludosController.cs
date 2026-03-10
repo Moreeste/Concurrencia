@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Helpers;
 
 namespace WebApi.Controllers
 {
@@ -15,6 +16,22 @@ namespace WebApi.Controllers
             Console.WriteLine($"Hilo después del await: {Thread.CurrentThread.ManagedThreadId}");
 
             return $"Hola, {nombre}!";
+        }
+
+        [HttpGet("Delay/{nombre}")]
+        public async Task<ActionResult<string>> ObtenerSaludoConDelay(string nombre)
+        {
+            var esperar = RandomGen.NextDouble() * 10 + 1;
+            await Task.Delay(TimeSpan.FromSeconds((int)esperar));
+            return $"Hola, {nombre}!";
+        }
+
+        [HttpGet("Despedida/{nombre}")]
+        public async Task<ActionResult<string>> ObtenerDespedidaConDelay(string nombre)
+        {
+            var esperar = RandomGen.NextDouble() * 10 + 1;
+            await Task.Delay(TimeSpan.FromSeconds((int)esperar));
+            return $"Bye, {nombre}!";
         }
     }
 }
