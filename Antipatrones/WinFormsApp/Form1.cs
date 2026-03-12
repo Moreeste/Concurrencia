@@ -17,9 +17,18 @@ namespace WinFormsApp
         {
             loadingGif.Visible = true;
 
+            //Antipatron: Sincrono dento de asincrono
+            var valor = ObtenerValor().Result;
 
+            Console.WriteLine(valor);
 
             loadingGif.Visible = false;
+        }
+
+        private async Task<string> ObtenerValor()
+        {
+            await Task.Delay(1000).ConfigureAwait(false);
+            return "Esteban";
         }
 
         private void btnCancelar_Click(object sender, EventArgs e)
