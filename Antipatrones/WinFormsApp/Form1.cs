@@ -12,18 +12,41 @@ namespace WinFormsApp
             _apiUrl = "https://localhost:7186";
             _httpClient = new HttpClient();
         }
-        
+
         private async void btnIniciar_Click(object sender, EventArgs e)
         {
             loadingGif.Visible = true;
 
-            //Antipatron: Sincrono dento de asincrono
-            var valor = ObtenerValor().Result;
+            var resultadoStartNew = await Task.Factory.StartNew(async () =>
+            {
+                await Task.Delay(1000);
+                return 7;
+            }).Unwrap();
 
-            Console.WriteLine(valor);
+            var resultadoRun = await Task.Run(async () =>
+            {
+                await Task.Delay(1000);
+                return 7;
+            });
+
+            Console.WriteLine($"Resultado StartNew: {resultadoStartNew}");
+            Console.WriteLine($"Resultado Run: {resultadoRun}");
 
             loadingGif.Visible = false;
         }
+
+
+        //private async void btnIniciar_Click(object sender, EventArgs e)
+        //{
+        //    loadingGif.Visible = true;
+
+        //    //Antipatron: Sincrono dento de asincrono
+        //    var valor = ObtenerValor().Result;
+
+        //    Console.WriteLine(valor);
+
+        //    loadingGif.Visible = false;
+        //}
 
         private async Task<string> ObtenerValor()
         {
