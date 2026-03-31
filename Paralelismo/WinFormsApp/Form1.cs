@@ -19,29 +19,27 @@ namespace WinFormsApp
         {
             loadingGif.Visible = true;
 
-            var columasMatrizA = 1100;
-            var filas = 1000;
-            var colimasMatrizB = 1750;
-
-            var matrizA = Matrices.InicializarMatriz(filas, columasMatrizA);
-            var matrizB = Matrices.InicializarMatriz(columasMatrizA, colimasMatrizB);
-            var resultado = new double[filas, colimasMatrizB];
+            var directorioActual = AppDomain.CurrentDomain.BaseDirectory;
+            var carpetaOrigen = Path.Combine(directorioActual, @"Imagenes\resultado-secuencial");
+            var carpetaDestinoSecuencial = Path.Combine(directorioActual, @"Imagenes\foreach-secuencial");
+            var carpetaDestinoParalelo = Path.Combine(directorioActual, @"Imagenes\foreach-paralelo");
+            PrepararEjecucion(carpetaDestinoParalelo, carpetaDestinoSecuencial);
+            var archivos = Directory.EnumerateFiles(carpetaOrigen);
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            await Task.Run(() =>
+            foreach (var archivo in archivos)
             {
-                Matrices.MultiplicarMatricesSecuencial(matrizA, matrizB, resultado);
-            });
+                VoltearImagen(archivo, carpetaDestinoSecuencial);
+            }
             stopwatch.Stop();
             var tiempoSecuencial = stopwatch.Elapsed.TotalSeconds;
             Console.WriteLine($"Secuencial: {tiempoSecuencial} seg.");
 
-            resultado = new double[filas, colimasMatrizB];
             stopwatch.Restart();
-            await Task.Run(() =>
+            Parallel.ForEach(archivos, archivo =>
             {
-                Matrices.MultiplicarMatricesParalelo(matrizA, matrizB, resultado);
+                VoltearImagen(archivo, carpetaDestinoParalelo);
             });
             stopwatch.Stop();
             var tiempoParalelo = stopwatch.Elapsed.TotalSeconds;
@@ -52,44 +50,92 @@ namespace WinFormsApp
             loadingGif.Visible = false;
         }
 
+        private void VoltearImagen(string archivo, string carpetaDestino)
+        {
+            using (var image = new Bitmap(archivo))
+            {
+                image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                var nombreArchivo = Path.GetFileName(archivo);
+                var destino = Path.Combine(carpetaDestino, nombreArchivo);
+                image.Save(destino);
+            }
+        }
+
         //private async void btnIniciar_Click(object sender, EventArgs e)
         //{
         //    loadingGif.Visible = true;
 
-            //    var directorioActual = AppDomain.CurrentDomain.BaseDirectory;
-            //    var directorioBaseSecuencial = Path.Combine(directorioActual, @"Imagenes\resultado-secuencial");
-            //    var directorioBaseParalelo = Path.Combine(directorioActual, @"Imagenes\resultado-paralelo");
-            //    PrepararEjecucion(directorioBaseParalelo, directorioBaseSecuencial);
+        //    var columasMatrizA = 1100;
+        //    var filas = 1000;
+        //    var colimasMatrizB = 1750;
 
-            //    Console.WriteLine("Inicio");
+        //    var matrizA = Matrices.InicializarMatriz(filas, columasMatrizA);
+        //    var matrizB = Matrices.InicializarMatriz(columasMatrizA, colimasMatrizB);
+        //    var resultado = new double[filas, colimasMatrizB];
 
-            //    var imagenes = ObtenerImagenes();
+        //    var stopwatch = new Stopwatch();
+        //    stopwatch.Start();
+        //    await Task.Run(() =>
+        //    {
+        //        Matrices.MultiplicarMatricesSecuencial(matrizA, matrizB, resultado);
+        //    });
+        //    stopwatch.Stop();
+        //    var tiempoSecuencial = stopwatch.Elapsed.TotalSeconds;
+        //    Console.WriteLine($"Secuencial: {tiempoSecuencial} seg.");
 
-            //    //Secuencial
-            //    var stopwatch = new Stopwatch();
-            //    stopwatch.Start();
-            //    foreach (var imagen in imagenes)
-            //    {
-            //        await ProcesarImagen(directorioBaseSecuencial, imagen);
-            //    }
-            //    stopwatch.Stop();
-            //    var tiempoSecuencial = stopwatch.Elapsed.TotalSeconds;
-            //    Console.WriteLine($"Secuencial: {tiempoSecuencial}");
+        //    resultado = new double[filas, colimasMatrizB];
+        //    stopwatch.Restart();
+        //    await Task.Run(() =>
+        //    {
+        //        Matrices.MultiplicarMatricesParalelo(matrizA, matrizB, resultado);
+        //    });
+        //    stopwatch.Stop();
+        //    var tiempoParalelo = stopwatch.Elapsed.TotalSeconds;
+        //    Console.WriteLine($"Paralelo: {tiempoParalelo} seg.");
 
-            //    //Paralelo
-            //    stopwatch.Restart();
-            //    var tareasEnumerable = imagenes.Select(async imagen => await ProcesarImagen(directorioBaseParalelo, imagen));
-            //    await Task.WhenAll(tareasEnumerable);
-            //    stopwatch.Stop();
-            //    var tiempoParalelo = stopwatch.Elapsed.TotalSeconds;
-            //    Console.WriteLine($"Paralelo: {tiempoParalelo}");
+        //    EscribirComparacion(tiempoSecuencial, tiempoParalelo);
 
-            //    EscribirComparacion(tiempoSecuencial, tiempoParalelo);
+        //    loadingGif.Visible = false;
+        //}
 
-            //    Console.WriteLine("Fin");
+        //private async void btnIniciar_Click(object sender, EventArgs e)
+        //{
+        //    loadingGif.Visible = true;
 
-            //    loadingGif.Visible = false;
-            //}
+        //    var directorioActual = AppDomain.CurrentDomain.BaseDirectory;
+        //    var directorioBaseSecuencial = Path.Combine(directorioActual, @"Imagenes\resultado-secuencial");
+        //    var directorioBaseParalelo = Path.Combine(directorioActual, @"Imagenes\resultado-paralelo");
+        //    PrepararEjecucion(directorioBaseParalelo, directorioBaseSecuencial);
+
+        //    Console.WriteLine("Inicio");
+
+        //    var imagenes = ObtenerImagenes();
+
+        //    //Secuencial
+        //    var stopwatch = new Stopwatch();
+        //    stopwatch.Start();
+        //    foreach (var imagen in imagenes)
+        //    {
+        //        await ProcesarImagen(directorioBaseSecuencial, imagen);
+        //    }
+        //    stopwatch.Stop();
+        //    var tiempoSecuencial = stopwatch.Elapsed.TotalSeconds;
+        //    Console.WriteLine($"Secuencial: {tiempoSecuencial}");
+
+        //    //Paralelo
+        //    stopwatch.Restart();
+        //    var tareasEnumerable = imagenes.Select(async imagen => await ProcesarImagen(directorioBaseParalelo, imagen));
+        //    await Task.WhenAll(tareasEnumerable);
+        //    stopwatch.Stop();
+        //    var tiempoParalelo = stopwatch.Elapsed.TotalSeconds;
+        //    Console.WriteLine($"Paralelo: {tiempoParalelo}");
+
+        //    EscribirComparacion(tiempoSecuencial, tiempoParalelo);
+
+        //    Console.WriteLine("Fin");
+
+        //    loadingGif.Visible = false;
+        //}
 
         private void EscribirComparacion(double tiempo1, double tiempo2)
         {
