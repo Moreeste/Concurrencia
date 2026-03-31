@@ -17,19 +17,39 @@ namespace WinFormsApp
 
         private async void btnIniciar_Click(object sender, EventArgs e)
         {
-            Console.WriteLine("Secuencial");
+            loadingGif.Visible = true;
 
-            for (int i = 0; i < 11; i++)
+            var columasMatrizA = 1100;
+            var filas = 1000;
+            var colimasMatrizB = 1750;
+
+            var matrizA = Matrices.InicializarMatriz(filas, columasMatrizA);
+            var matrizB = Matrices.InicializarMatriz(columasMatrizA, colimasMatrizB);
+            var resultado = new double[filas, colimasMatrizB];
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            await Task.Run(() =>
             {
-                Console.WriteLine(i);
-            }
-
-            Console.WriteLine("En paralelo");
-
-            Parallel.For(0, 11, i =>
-            {
-                Console.WriteLine(i);
+                Matrices.MultiplicarMatricesSecuencial(matrizA, matrizB, resultado);
             });
+            stopwatch.Stop();
+            var tiempoSecuencial = stopwatch.Elapsed.TotalSeconds;
+            Console.WriteLine($"Secuencial: {tiempoSecuencial} seg.");
+
+            resultado = new double[filas, colimasMatrizB];
+            stopwatch.Restart();
+            await Task.Run(() =>
+            {
+                Matrices.MultiplicarMatricesParalelo(matrizA, matrizB, resultado);
+            });
+            stopwatch.Stop();
+            var tiempoParalelo = stopwatch.Elapsed.TotalSeconds;
+            Console.WriteLine($"Paralelo: {tiempoParalelo} seg.");
+
+            EscribirComparacion(tiempoSecuencial, tiempoParalelo);
+
+            loadingGif.Visible = false;
         }
 
         //private async void btnIniciar_Click(object sender, EventArgs e)
