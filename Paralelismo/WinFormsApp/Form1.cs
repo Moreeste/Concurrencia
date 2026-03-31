@@ -17,42 +17,59 @@ namespace WinFormsApp
 
         private async void btnIniciar_Click(object sender, EventArgs e)
         {
-            loadingGif.Visible = true;
+            Console.WriteLine("Secuencial");
 
-            var directorioActual = AppDomain.CurrentDomain.BaseDirectory;
-            var directorioBaseSecuencial = Path.Combine(directorioActual, @"Imagenes\resultado-secuencial");
-            var directorioBaseParalelo = Path.Combine(directorioActual, @"Imagenes\resultado-paralelo");
-            PrepararEjecucion(directorioBaseParalelo, directorioBaseSecuencial);
-
-            Console.WriteLine("Inicio");
-
-            var imagenes = ObtenerImagenes();
-
-            //Secuencial
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            foreach (var imagen in imagenes)
+            for (int i = 0; i < 11; i++)
             {
-                await ProcesarImagen(directorioBaseSecuencial, imagen);
+                Console.WriteLine(i);
             }
-            stopwatch.Stop();
-            var tiempoSecuencial = stopwatch.Elapsed.TotalSeconds;
-            Console.WriteLine($"Secuencial: {tiempoSecuencial}");
 
-            //Paralelo
-            stopwatch.Restart();
-            var tareasEnumerable = imagenes.Select(async imagen => await ProcesarImagen(directorioBaseParalelo, imagen));
-            await Task.WhenAll(tareasEnumerable);
-            stopwatch.Stop();
-            var tiempoParalelo = stopwatch.Elapsed.TotalSeconds;
-            Console.WriteLine($"Paralelo: {tiempoParalelo}");
+            Console.WriteLine("En paralelo");
 
-            EscribirComparacion(tiempoSecuencial, tiempoParalelo);
-
-            Console.WriteLine("Fin");
-
-            loadingGif.Visible = false;
+            Parallel.For(0, 11, i =>
+            {
+                Console.WriteLine(i);
+            });
         }
+
+        //private async void btnIniciar_Click(object sender, EventArgs e)
+        //{
+        //    loadingGif.Visible = true;
+
+            //    var directorioActual = AppDomain.CurrentDomain.BaseDirectory;
+            //    var directorioBaseSecuencial = Path.Combine(directorioActual, @"Imagenes\resultado-secuencial");
+            //    var directorioBaseParalelo = Path.Combine(directorioActual, @"Imagenes\resultado-paralelo");
+            //    PrepararEjecucion(directorioBaseParalelo, directorioBaseSecuencial);
+
+            //    Console.WriteLine("Inicio");
+
+            //    var imagenes = ObtenerImagenes();
+
+            //    //Secuencial
+            //    var stopwatch = new Stopwatch();
+            //    stopwatch.Start();
+            //    foreach (var imagen in imagenes)
+            //    {
+            //        await ProcesarImagen(directorioBaseSecuencial, imagen);
+            //    }
+            //    stopwatch.Stop();
+            //    var tiempoSecuencial = stopwatch.Elapsed.TotalSeconds;
+            //    Console.WriteLine($"Secuencial: {tiempoSecuencial}");
+
+            //    //Paralelo
+            //    stopwatch.Restart();
+            //    var tareasEnumerable = imagenes.Select(async imagen => await ProcesarImagen(directorioBaseParalelo, imagen));
+            //    await Task.WhenAll(tareasEnumerable);
+            //    stopwatch.Stop();
+            //    var tiempoParalelo = stopwatch.Elapsed.TotalSeconds;
+            //    Console.WriteLine($"Paralelo: {tiempoParalelo}");
+
+            //    EscribirComparacion(tiempoSecuencial, tiempoParalelo);
+
+            //    Console.WriteLine("Fin");
+
+            //    loadingGif.Visible = false;
+            //}
 
         private void EscribirComparacion(double tiempo1, double tiempo2)
         {
