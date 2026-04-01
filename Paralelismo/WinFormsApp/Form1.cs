@@ -20,6 +20,18 @@ namespace WinFormsApp
             loadingGif.Visible = true;
             Console.WriteLine("Inicio");
 
+            for (int i = 1; i < 13; i++)
+            {
+                await RealizarPruebaMatrices(i);
+            }
+
+            _cancellationTokenSource = null;
+            Console.WriteLine("Fin");
+            loadingGif.Visible = false;
+        }
+
+        private async Task RealizarPruebaMatrices(int maximoGradoParalelismo)
+        {
             int colCount = 2508;
             int rowCount = 1300;
             int colCount2 = 1850;
@@ -31,10 +43,16 @@ namespace WinFormsApp
 
             try
             {
+                var stopwatch = new Stopwatch();
+                stopwatch.Start();
+
                 await Task.Run(() =>
                 {
-                    Matrices.MultiplicarMatricesParalelo(m1, m2, result, _cancellationTokenSource.Token);
+                    Matrices.MultiplicarMatricesParalelo(m1, m2, result, _cancellationTokenSource.Token, maximoGradoParalelismo);
                 });
+
+                stopwatch.Stop();
+                Console.WriteLine($"Máximo grado: {maximoGradoParalelismo}, tiempo {stopwatch.Elapsed.TotalSeconds} seg.");
             }
             catch (Exception ex)
             {
@@ -44,10 +62,6 @@ namespace WinFormsApp
             {
                 _cancellationTokenSource.Dispose();
             }
-
-            _cancellationTokenSource = null;
-            Console.WriteLine("Fin");
-            loadingGif.Visible = false;
         }
 
         //private async void btnIniciar_Click(object sender, EventArgs e)
