@@ -26,21 +26,35 @@ namespace WinFormsApp
             PrepararEjecucion(carpetaDestinoParalelo, carpetaDestinoSecuencial);
             var archivos = Directory.EnumerateFiles(carpetaOrigen);
 
+            var columasMatrizA = 208;
+            var filas = 1240;
+            var colimasMatrizB = 750;
+            var matrizA = Matrices.InicializarMatriz(filas, columasMatrizA);
+            var matrizB = Matrices.InicializarMatriz(columasMatrizA, colimasMatrizB);
+            var resultado = new double[filas, colimasMatrizB];
+
+            Action multiplicarMatrices = () => Matrices.MultiplicarMatricesSecuencial(matrizA, matrizB, resultado);
+            Action VoltearImagenes = () =>
+            {
+                foreach (var archivo in archivos)
+                {
+                    VoltearImagen(archivo, carpetaDestinoSecuencial);
+                }
+            };
+            Action[] acciones = new Action[] { multiplicarMatrices, VoltearImagenes };
+
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            foreach (var archivo in archivos)
+            foreach (var accion in acciones)
             {
-                VoltearImagen(archivo, carpetaDestinoSecuencial);
+                accion();
             }
             stopwatch.Stop();
             var tiempoSecuencial = stopwatch.Elapsed.TotalSeconds;
             Console.WriteLine($"Secuencial: {tiempoSecuencial} seg.");
 
             stopwatch.Restart();
-            Parallel.ForEach(archivos, archivo =>
-            {
-                VoltearImagen(archivo, carpetaDestinoParalelo);
-            });
+            Parallel.Invoke(acciones);
             stopwatch.Stop();
             var tiempoParalelo = stopwatch.Elapsed.TotalSeconds;
             Console.WriteLine($"Paralelo: {tiempoParalelo} seg.");
@@ -49,6 +63,41 @@ namespace WinFormsApp
 
             loadingGif.Visible = false;
         }
+
+        //private async void btnIniciar_Click(object sender, EventArgs e)
+        //{
+        //    loadingGif.Visible = true;
+
+        //    var directorioActual = AppDomain.CurrentDomain.BaseDirectory;
+        //    var carpetaOrigen = Path.Combine(directorioActual, @"Imagenes\resultado-secuencial");
+        //    var carpetaDestinoSecuencial = Path.Combine(directorioActual, @"Imagenes\foreach-secuencial");
+        //    var carpetaDestinoParalelo = Path.Combine(directorioActual, @"Imagenes\foreach-paralelo");
+        //    PrepararEjecucion(carpetaDestinoParalelo, carpetaDestinoSecuencial);
+        //    var archivos = Directory.EnumerateFiles(carpetaOrigen);
+
+        //    var stopwatch = new Stopwatch();
+        //    stopwatch.Start();
+        //    foreach (var archivo in archivos)
+        //    {
+        //        VoltearImagen(archivo, carpetaDestinoSecuencial);
+        //    }
+        //    stopwatch.Stop();
+        //    var tiempoSecuencial = stopwatch.Elapsed.TotalSeconds;
+        //    Console.WriteLine($"Secuencial: {tiempoSecuencial} seg.");
+
+        //    stopwatch.Restart();
+        //    Parallel.ForEach(archivos, archivo =>
+        //    {
+        //        VoltearImagen(archivo, carpetaDestinoParalelo);
+        //    });
+        //    stopwatch.Stop();
+        //    var tiempoParalelo = stopwatch.Elapsed.TotalSeconds;
+        //    Console.WriteLine($"Paralelo: {tiempoParalelo} seg.");
+
+        //    EscribirComparacion(tiempoSecuencial, tiempoParalelo);
+
+        //    loadingGif.Visible = false;
+        //}
 
         private void VoltearImagen(string archivo, string carpetaDestino)
         {
