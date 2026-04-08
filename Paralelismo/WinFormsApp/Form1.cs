@@ -20,15 +20,38 @@ namespace WinFormsApp
             loadingGif.Visible = true;
             Console.WriteLine("Inicio");
 
-            for (int i = 1; i < 13; i++)
+            var valorSinInterLocked = 0;
+            Parallel.For(0, 1000000, i =>
             {
-                await RealizarPruebaMatrices(i);
-            }
+                valorSinInterLocked++;
+            });
+            Console.WriteLine($"Sumatoria sin interlocked: {valorSinInterLocked}");
 
-            _cancellationTokenSource = null;
+            var valorConInterLocked = 0;
+            Parallel.For(0, 1000000, i =>
+            {
+                Interlocked.Increment(ref valorConInterLocked);
+            });
+            Console.WriteLine($"Sumatoria con interlocked: {valorConInterLocked}");
+
             Console.WriteLine("Fin");
             loadingGif.Visible = false;
         }
+
+        //private async void btnIniciar_Click(object sender, EventArgs e)
+        //{
+        //    loadingGif.Visible = true;
+        //    Console.WriteLine("Inicio");
+
+        //    for (int i = 1; i < 13; i++)
+        //    {
+        //        await RealizarPruebaMatrices(i);
+        //    }
+
+        //    _cancellationTokenSource = null;
+        //    Console.WriteLine("Fin");
+        //    loadingGif.Visible = false;
+        //}
 
         private async Task RealizarPruebaMatrices(int maximoGradoParalelismo)
         {
