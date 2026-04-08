@@ -20,23 +20,50 @@ namespace WinFormsApp
             loadingGif.Visible = true;
             Console.WriteLine("Inicio");
 
-            var valorSinInterLocked = 0;
-            Parallel.For(0, 1000000, i =>
-            {
-                valorSinInterLocked++;
-            });
-            Console.WriteLine($"Sumatoria sin interlocked: {valorSinInterLocked}");
+            var valorIncrementado = 0;
+            var valorSumado = 0;
+            var mutex = new object();
 
-            var valorConInterLocked = 0;
-            Parallel.For(0, 1000000, i =>
+            Parallel.For(0, 10000, i =>
             {
-                Interlocked.Increment(ref valorConInterLocked);
+                //Interlocked.Increment(ref valorIncrementado);
+                //Interlocked.Add(ref valorSumado, valorIncrementado);
+
+                lock (mutex)
+                {
+                    valorIncrementado++;
+                    valorSumado += valorIncrementado;
+                }
             });
-            Console.WriteLine($"Sumatoria con interlocked: {valorConInterLocked}");
+            Console.WriteLine($"Valor incrementado: {valorIncrementado}");
+            Console.WriteLine($"Valor sumado: {valorSumado}");
 
             Console.WriteLine("Fin");
             loadingGif.Visible = false;
         }
+
+        //private async void btnIniciar_Click(object sender, EventArgs e)
+        //{
+        //    loadingGif.Visible = true;
+        //    Console.WriteLine("Inicio");
+
+        //    var valorSinInterLocked = 0;
+        //    Parallel.For(0, 1000000, i =>
+        //    {
+        //        valorSinInterLocked++;
+        //    });
+        //    Console.WriteLine($"Sumatoria sin interlocked: {valorSinInterLocked}");
+
+        //    var valorConInterLocked = 0;
+        //    Parallel.For(0, 1000000, i =>
+        //    {
+        //        Interlocked.Increment(ref valorConInterLocked);
+        //    });
+        //    Console.WriteLine($"Sumatoria con interlocked: {valorConInterLocked}");
+
+        //    Console.WriteLine("Fin");
+        //    loadingGif.Visible = false;
+        //}
 
         //private async void btnIniciar_Click(object sender, EventArgs e)
         //{
