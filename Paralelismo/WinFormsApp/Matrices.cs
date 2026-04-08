@@ -64,5 +64,30 @@ namespace WinFormsApp
                 }
             });
         }
+
+        public static double[,] SumaMatricesSecuencial(double[,] matA, double[,] matB)
+        {
+            int matARows = matA.GetLength(0);
+            int matACols = matA.GetLength(1);
+            int matBRows = matB.GetLength(0);
+            int matBCols = matB.GetLength(1);
+
+            if (matARows != matBRows || matACols != matBCols)
+            {
+                throw new ApplicationException("Las matrices deben tener las mismas dimensiones para ser sumadas.");
+            }
+
+            double[,] result = new double[matARows, matACols];
+
+            for (int i = 0; i < matARows; i++)
+            {
+                for (int j = 0; j < matBCols; j++)
+                {
+                    result[i, j] = matA[i, j] + matB[i, j];
+                }
+            }
+
+            return result;
+        }
     }
 }

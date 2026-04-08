@@ -20,19 +20,48 @@ namespace WinFormsApp
             loadingGif.Visible = true;
             Console.WriteLine("Inicio");
 
-            _cancellationTokenSource = new CancellationTokenSource();
-            var fuente = Enumerable.Range(1, 20);
-            var elementosPares = fuente
-                .AsParallel().WithDegreeOfParallelism(2).WithCancellation(_cancellationTokenSource.Token)
-                .AsOrdered().Where(x => x % 2 == 0).ToList();
-            foreach (var elemento in elementosPares)
-            {
-                Console.WriteLine(elemento);
-            }
+            //var fuente = Enumerable.Range(1, 1000);
+            //var suma = fuente.AsParallel().Sum();
+            //var promedio = fuente.AsParallel().Average();
+            //Console.WriteLine($"La suma es: {suma}");
+            //Console.WriteLine($"El promedio es: {promedio}");
+
+            var matrices = Enumerable.Range(1, 500).Select(x => Matrices.InicializarMatriz(1000, 1000)).ToList();
+            Console.WriteLine("Matrices generadas");
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            var sumaMatricesSecuencial = matrices.Aggregate(Matrices.SumaMatricesSecuencial);
+            var tiempoSecuencial = stopwatch.Elapsed.TotalSeconds;
+            Console.WriteLine($"Tiempo secuencial: {tiempoSecuencial} seg.");
+            stopwatch.Restart();
+            var sumaMatricesParalelo = matrices.AsParallel().Aggregate(Matrices.SumaMatricesSecuencial);
+            var tiempoParalelo = stopwatch.Elapsed.TotalSeconds;
+            Console.WriteLine($"Tiempo paralelo: {tiempoParalelo}");
+            EscribirComparacion(tiempoSecuencial, tiempoParalelo);
 
             Console.WriteLine("Fin");
             loadingGif.Visible = false;
         }
+
+        //private async void btnIniciar_Click(object sender, EventArgs e)
+        //{
+        //    loadingGif.Visible = true;
+        //    Console.WriteLine("Inicio");
+
+        //    _cancellationTokenSource = new CancellationTokenSource();
+        //    var fuente = Enumerable.Range(1, 20);
+        //    var elementosPares = fuente
+        //        .AsParallel().WithDegreeOfParallelism(2).WithCancellation(_cancellationTokenSource.Token)
+        //        .AsOrdered().Where(x => x % 2 == 0).ToList();
+        //    foreach (var elemento in elementosPares)
+        //    {
+        //        Console.WriteLine(elemento);
+        //    }
+
+        //    Console.WriteLine("Fin");
+        //    loadingGif.Visible = false;
+        //}
 
         //private async void btnIniciar_Click(object sender, EventArgs e)
         //{
