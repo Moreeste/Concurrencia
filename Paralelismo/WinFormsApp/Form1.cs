@@ -20,27 +20,46 @@ namespace WinFormsApp
             loadingGif.Visible = true;
             Console.WriteLine("Inicio");
 
-            var valorIncrementado = 0;
-            var valorSumado = 0;
-            var mutex = new object();
-
-            Parallel.For(0, 10000, i =>
+            _cancellationTokenSource = new CancellationTokenSource();
+            var fuente = Enumerable.Range(1, 20);
+            var elementosPares = fuente
+                .AsParallel().WithDegreeOfParallelism(2).WithCancellation(_cancellationTokenSource.Token)
+                .AsOrdered().Where(x => x % 2 == 0).ToList();
+            foreach (var elemento in elementosPares)
             {
-                //Interlocked.Increment(ref valorIncrementado);
-                //Interlocked.Add(ref valorSumado, valorIncrementado);
-
-                lock (mutex)
-                {
-                    valorIncrementado++;
-                    valorSumado += valorIncrementado;
-                }
-            });
-            Console.WriteLine($"Valor incrementado: {valorIncrementado}");
-            Console.WriteLine($"Valor sumado: {valorSumado}");
+                Console.WriteLine(elemento);
+            }
 
             Console.WriteLine("Fin");
             loadingGif.Visible = false;
         }
+
+        //private async void btnIniciar_Click(object sender, EventArgs e)
+        //{
+        //    loadingGif.Visible = true;
+        //    Console.WriteLine("Inicio");
+
+        //    var valorIncrementado = 0;
+        //    var valorSumado = 0;
+        //    var mutex = new object();
+
+        //    Parallel.For(0, 10000, i =>
+        //    {
+        //        //Interlocked.Increment(ref valorIncrementado);
+        //        //Interlocked.Add(ref valorSumado, valorIncrementado);
+
+        //        lock (mutex)
+        //        {
+        //            valorIncrementado++;
+        //            valorSumado += valorIncrementado;
+        //        }
+        //    });
+        //    Console.WriteLine($"Valor incrementado: {valorIncrementado}");
+        //    Console.WriteLine($"Valor sumado: {valorSumado}");
+
+        //    Console.WriteLine("Fin");
+        //    loadingGif.Visible = false;
+        //}
 
         //private async void btnIniciar_Click(object sender, EventArgs e)
         //{
