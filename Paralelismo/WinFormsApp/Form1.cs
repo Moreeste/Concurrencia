@@ -20,29 +20,51 @@ namespace WinFormsApp
             loadingGif.Visible = true;
             Console.WriteLine("Inicio");
 
-            //var fuente = Enumerable.Range(1, 1000);
-            //var suma = fuente.AsParallel().Sum();
-            //var promedio = fuente.AsParallel().Average();
-            //Console.WriteLine($"La suma es: {suma}");
-            //Console.WriteLine($"El promedio es: {promedio}");
+            var queryParalelo = Enumerable.Range(1, 10).AsParallel().WithDegreeOfParallelism(2)
+                .Select(x => Matrices.InicializarMatriz(100, 100));
 
-            var matrices = Enumerable.Range(1, 500).Select(x => Matrices.InicializarMatriz(1000, 1000)).ToList();
-            Console.WriteLine("Matrices generadas");
+            //foreach (var matriz in queryParalelo)
+            //{
+            //    Console.WriteLine({matriz[0, 0]});
+            //}
 
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            var sumaMatricesSecuencial = matrices.Aggregate(Matrices.SumaMatricesSecuencial);
-            var tiempoSecuencial = stopwatch.Elapsed.TotalSeconds;
-            Console.WriteLine($"Tiempo secuencial: {tiempoSecuencial} seg.");
-            stopwatch.Restart();
-            var sumaMatricesParalelo = matrices.AsParallel().Aggregate(Matrices.SumaMatricesSecuencial);
-            var tiempoParalelo = stopwatch.Elapsed.TotalSeconds;
-            Console.WriteLine($"Tiempo paralelo: {tiempoParalelo}");
-            EscribirComparacion(tiempoSecuencial, tiempoParalelo);
+            queryParalelo.ForAll(matriz =>
+            {
+                Console.WriteLine(matriz[0, 0]);
+            });
 
             Console.WriteLine("Fin");
             loadingGif.Visible = false;
         }
+
+        //private async void btnIniciar_Click(object sender, EventArgs e)
+        //{
+        //    loadingGif.Visible = true;
+        //    Console.WriteLine("Inicio");
+
+        //    //var fuente = Enumerable.Range(1, 1000);
+        //    //var suma = fuente.AsParallel().Sum();
+        //    //var promedio = fuente.AsParallel().Average();
+        //    //Console.WriteLine($"La suma es: {suma}");
+        //    //Console.WriteLine($"El promedio es: {promedio}");
+
+        //    var matrices = Enumerable.Range(1, 500).Select(x => Matrices.InicializarMatriz(1000, 1000)).ToList();
+        //    Console.WriteLine("Matrices generadas");
+
+        //    var stopwatch = new Stopwatch();
+        //    stopwatch.Start();
+        //    var sumaMatricesSecuencial = matrices.Aggregate(Matrices.SumaMatricesSecuencial);
+        //    var tiempoSecuencial = stopwatch.Elapsed.TotalSeconds;
+        //    Console.WriteLine($"Tiempo secuencial: {tiempoSecuencial} seg.");
+        //    stopwatch.Restart();
+        //    var sumaMatricesParalelo = matrices.AsParallel().Aggregate(Matrices.SumaMatricesSecuencial);
+        //    var tiempoParalelo = stopwatch.Elapsed.TotalSeconds;
+        //    Console.WriteLine($"Tiempo paralelo: {tiempoParalelo}");
+        //    EscribirComparacion(tiempoSecuencial, tiempoParalelo);
+
+        //    Console.WriteLine("Fin");
+        //    loadingGif.Visible = false;
+        //}
 
         //private async void btnIniciar_Click(object sender, EventArgs e)
         //{

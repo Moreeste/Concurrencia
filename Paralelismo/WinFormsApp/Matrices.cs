@@ -1,14 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace WinFormsApp
 {
     public static class Matrices
     {
+        static RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
+
+        [ThreadStatic]
+        static Random random;
+
         public static double[,] InicializarMatriz(int filas, int columnas)
         {
-            Random random = new Random();
+            Thread.Sleep(1000);
+
+            if (random == null)
+            {
+                var buffer = new byte[4];
+                rng.GetBytes(buffer);
+                random = new Random(BitConverter.ToInt32(buffer, 0));
+            }
 
             double[,] matriz = new double[filas, columnas];
 
