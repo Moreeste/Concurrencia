@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace WinFormsApp
@@ -20,25 +21,55 @@ namespace WinFormsApp
             loadingGif.Visible = true;
             Console.WriteLine("Inicio");
 
-            var stopwatch = new Stopwatch();
+            var mutex = new object();
+            Random random = new Random();
+            var diccionarioConcurrente = new ConcurrentDictionary<double, int>();
 
-            stopwatch.Start();
-            var matrices = Enumerable.Range(1, 1000).AsParallel().Select(x => Matrices.InicializarMatriz(750, 750)).ToList();
+            Parallel.For(1, 1000000, i =>
+            {
+                double llave;
+                lock (mutex)
+                {
+                    llave = random.NextDouble();
+                }
+                diccionarioConcurrente.AddOrUpdate(llave, 1, (llave, valorAnterior) => valorAnterior + 1);
+            });
 
-            var tiempoParalelismo = stopwatch.Elapsed.TotalSeconds;
-            Console.WriteLine($"Paralelismo: {tiempoParalelismo} segundos.");
+            var masFrecuentes = diccionarioConcurrente.OrderByDescending(x => x.Value).Take(5).ToList();
 
-            stopwatch.Restart();
-            var matrices2 = Enumerable.Range(1, 1000).AsParallel().Select(x => Matrices.InicializarMatrizSaturado(750, 750)).ToList();
-
-            var tiempoSobreSaturacion = stopwatch.Elapsed.TotalSeconds;
-
-            Console.WriteLine($"Sobre saturación: {tiempoSobreSaturacion} segundos.");
-            EscribirComparacion(tiempoParalelismo, tiempoSobreSaturacion);
+            foreach (var item in masFrecuentes)
+            {
+                Console.WriteLine($"Valor: {item.Key}, Frecuencia: {item.Value}");
+            }
 
             Console.WriteLine("Fin");
             loadingGif.Visible = false;
         }
+
+        //private async void btnIniciar_Click(object sender, EventArgs e)
+        //{
+        //    loadingGif.Visible = true;
+        //    Console.WriteLine("Inicio");
+
+        //    var stopwatch = new Stopwatch();
+
+        //    stopwatch.Start();
+        //    var matrices = Enumerable.Range(1, 1000).AsParallel().Select(x => Matrices.InicializarMatriz(750, 750)).ToList();
+
+        //    var tiempoParalelismo = stopwatch.Elapsed.TotalSeconds;
+        //    Console.WriteLine($"Paralelismo: {tiempoParalelismo} segundos.");
+
+        //    stopwatch.Restart();
+        //    var matrices2 = Enumerable.Range(1, 1000).AsParallel().Select(x => Matrices.InicializarMatrizSaturado(750, 750)).ToList();
+
+        //    var tiempoSobreSaturacion = stopwatch.Elapsed.TotalSeconds;
+
+        //    Console.WriteLine($"Sobre saturación: {tiempoSobreSaturacion} segundos.");
+        //    EscribirComparacion(tiempoParalelismo, tiempoSobreSaturacion);
+
+        //    Console.WriteLine("Fin");
+        //    loadingGif.Visible = false;
+        //}
 
         private void EscribirComparacion(double tiempo1, double tiempo2)
         {
