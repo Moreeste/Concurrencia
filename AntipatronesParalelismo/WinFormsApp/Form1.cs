@@ -20,34 +20,51 @@ namespace WinFormsApp
             loadingGif.Visible = true;
             Console.WriteLine("Inicio");
 
-            var stopwatch = new Stopwatch();
-            var max = int.MaxValue / 3;
-            var numeros = Enumerable.Range(0, max);
-
-            stopwatch.Start();
-            await Task.Run(() =>
+            var valorSinInterlocked = 0;
+            Parallel.For(0, 1000000, i =>
             {
-                foreach (var numero in numeros)
-                {
-                    var resultado = numero + numero;
-                }
+                valorSinInterlocked++;
             });
-            Console.WriteLine($"Tiempo transcurrido secuencial: {stopwatch.Elapsed.TotalSeconds} segundos.");
-
-            stopwatch.Restart();
-            await Task.Run(() =>
-            {
-                Parallel.ForEach(numeros, numero =>
-                {
-                    var resultado = numero + numero;
-                });
-            });
-            Console.WriteLine($"Tiempo transcurrido paralelo: {stopwatch.Elapsed.TotalSeconds} segundos.");
+            Console.WriteLine($"Sumatoria sin interlocked: {valorSinInterlocked}");
 
 
             Console.WriteLine("Fin");
             loadingGif.Visible = false;
         }
+
+        //private async void btnIniciar_Click(object sender, EventArgs e)
+        //{
+        //    loadingGif.Visible = true;
+        //    Console.WriteLine("Inicio");
+
+        //    var stopwatch = new Stopwatch();
+        //    var max = int.MaxValue / 3;
+        //    var numeros = Enumerable.Range(0, max);
+
+        //    stopwatch.Start();
+        //    await Task.Run(() =>
+        //    {
+        //        foreach (var numero in numeros)
+        //        {
+        //            var resultado = numero + numero;
+        //        }
+        //    });
+        //    Console.WriteLine($"Tiempo transcurrido secuencial: {stopwatch.Elapsed.TotalSeconds} segundos.");
+
+        //    stopwatch.Restart();
+        //    await Task.Run(() =>
+        //    {
+        //        Parallel.ForEach(numeros, numero =>
+        //        {
+        //            var resultado = numero + numero;
+        //        });
+        //    });
+        //    Console.WriteLine($"Tiempo transcurrido paralelo: {stopwatch.Elapsed.TotalSeconds} segundos.");
+
+
+        //    Console.WriteLine("Fin");
+        //    loadingGif.Visible = false;
+        //}
 
         private void btnCancelar_Click(object sender, EventArgs e)
         {
