@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace WinFormsApp
 {
     public partial class Form1 : Form
@@ -18,6 +20,29 @@ namespace WinFormsApp
             loadingGif.Visible = true;
             Console.WriteLine("Inicio");
 
+            var stopwatch = new Stopwatch();
+            var max = int.MaxValue / 3;
+            var numeros = Enumerable.Range(0, max);
+
+            stopwatch.Start();
+            await Task.Run(() =>
+            {
+                foreach (var numero in numeros)
+                {
+                    var resultado = numero + numero;
+                }
+            });
+            Console.WriteLine($"Tiempo transcurrido secuencial: {stopwatch.Elapsed.TotalSeconds} segundos.");
+
+            stopwatch.Restart();
+            await Task.Run(() =>
+            {
+                Parallel.ForEach(numeros, numero =>
+                {
+                    var resultado = numero + numero;
+                });
+            });
+            Console.WriteLine($"Tiempo transcurrido paralelo: {stopwatch.Elapsed.TotalSeconds} segundos.");
 
 
             Console.WriteLine("Fin");
